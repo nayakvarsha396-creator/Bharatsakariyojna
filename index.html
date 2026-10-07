@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>भारत सरकारी योजनाएँ</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, "Noto Sans Devanagari", sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
+
+header {
+  background: linear-gradient(135deg, #ff7a00, #ff9d2e);
+  color: white;
+  padding: 25px 15px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+header p {
+  margin: 8px 0 0;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+.search-box {
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 3px 15px #0001;
+  margin-bottom: 20px;
+}
+
+input, textarea, button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  background: #138808;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #0d7205;
+}
+
+.api-note {
+  font-size: 13px;
+  color: #777;
+  margin-top: 8px;
+}
+
+.card {
+  background: white;
+  margin: 15px 0;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px #0001;
+}
+
+.card h2 {
+  color: #e65100;
+  margin-top: 0;
+}
+
+.card h3 {
+  color: #138808;
+}
+
+.loading {
+  text-align: center;
+  padding: 25px;
+  font-weight: bold;
+}
+
+.error {
+  background: #ffe8e8;
+  color: #a40000;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🇮🇳 भारत सरकारी योजनाएँ</h1>
+  <p>सरकारी योजनाओं की जानकारी हिंदी में — AI की मदद से</p>
+</header>
+
+<div class="container">
+
+  <div class="search-box">
+
+    <label><b>Groq API Key</b></label>
+
+    <input
+      type="password"
+      id="apiKey"
+      placeholder="gsk_XXXXXXXXXXXXXXXX"
+    >
+
+    <div class="api-note">
+      API Key केवल आपके ब्राउज़र में इस्तेमाल होगी। इसे किसी के साथ शेयर न करें।
+    </div>
+
+    <label><b>योजना खोजें</b></label>
+
+    <input
+      id="search"
+      placeholder="जैसे: किसानों के लिए योजनाएँ"
+    >
+
+    <button onclick="searchSchemes()">
+      🔎 योजनाएँ खोजें
+    </button>
+
+  </div>
+
+  <div id="result"></div>
+
+</div>
+
+<footer>
+  © 2026 भारत सरकारी योजना जानकारी
+</footer>
+
+
+<script>
+
+async function searchSchemes() {
+
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const query = document.getElementById("search").value.trim();
+  const result = document.getElementById("result");
+
+  if (!apiKey) {
+    result.innerHTML =
+      '<div class="error">कृपया Groq API Key डालें।</div>';
+    return;
+  }
+
+  if (!query) {
+    result.innerHTML =
+      '<div class="error">कृपया योजना या लाभार्थी की जानकारी लिखें।</div>';
+    return;
+  }
+
+  result.innerHTML =
+    '<div class="loading">⏳ सरकारी योजनाएँ खोजी जा रही हैं...</div>';
+
+  const prompt = `
+आप भारत की सरकारी योजनाओं के जानकारी सहायक हैं।
+
+यूज़र का प्रश्न:
+${query}
+
+वेब से उपलब्ध नवीन जानकारी के आधार पर भारत सरकार और
+राज्य सरकार की संबंधित योजनाओं की जानकारी हिंदी में दें।
+
+हर योजना के लिए यह जानकारी दें:
+
+1. योजना का नाम
+2. योजना किसके लिए है
+3. मुख्य लाभ
+4. पात्रता
+5. आवश्यक दस्तावेज
+6. आवेदन कैसे करें
+7. आधिकारिक वेबसाइट
+
+केवल विश्वसनीय/आधिकारिक स्रोतों को प्राथमिकता दें।
+यदि जानकारी निश्चित नहीं है तो साफ बताएं।
+उत्तर सरल हिंदी में दें।
+`;
+
+  try {
+
+    const response = await fetch(
+      "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",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+
+        body: JSON.stringify({
+
+          model: "groq/compound",
+
+          messages: [
+            {
+              role: "system",
+              content:
+                "आप भारत की सरकारी योजनाओं के हिंदी विशेषज्ञ हैं।"
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
+
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error?.message || "API request failed"
+      );
+    }
+
+    const answer =
+      data.choices?.[0]?.message?.content ||
+      "कोई जानकारी नहीं मिली।";
+
+    result.innerHTML =
+      '<div class="card">' +
+      formatAnswer(answer) +
+      '</div>';
+
+  } catch (error) {
+
+    result.innerHTML =
+      `<div class="error">
+        ❌ Error: ${escapeHTML(error.message)}
+      </div>`;
+
+  }
+}
+
+
+function formatAnswer(text) {
+
+  let html = escapeHTML(text);
+
+  html = html.replace(
+    /\*\*(.*?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+
+  html = html.replace(
+    /\n\n/g,
+    "</p><p>"
+  );
+
+  html = html.replace(
+    /\n/g,
+    "<br>"
+  );
+
+  return "<p>" + html + "</p>";
+}
+
+
+function escapeHTML(text) {
+
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
